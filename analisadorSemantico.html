@@ -1,0 +1,133 @@
+<html>
+
+<body>
+
+	<head>
+		<script src="jquery-3.3.1.min.js"></script>
+	</head>
+	<h5>Entre com o codigo...</h5>
+	<textarea id="codigo" name="codigo" rows="20" cols="60">
+main()
+{
+	int a = 1, b=2, c;
+	char t, y = "s";
+	float r = 1.2, y;
+    a=b+c;
+    if(a>b)
+    {
+        char t, y = "t";
+        int a1 = 5, b, c3 = 7;
+        a=b*c;
+	}   
+	int d;    
+}  
+</textarea>
+	</br>
+
+	<script src="jquery-3.3.1.min.js"></script>
+
+	<script>
+
+		var i = 0;
+		var arvoreSimbolo = [];
+		Analisador();
+
+		function Analisador() {
+			return montaArvoreSimbolos();
+		}
+
+		function montarArvoreSimboloTemp(codigo, tipo, contexto) {
+			i = i + 5;
+			var nome = "";
+			var valor = "";
+			while (codigo.charAt(i) != ";") {
+				var x = codigo.charAt(i);
+				if (codigo.charAt(i) != "=" && codigo.charAt(i) != ",")
+					nome = nome + codigo.charAt(i);
+
+				if (codigo.charAt(i) == "=") {
+					i++;
+					valor = "";
+					while (codigo.charAt(i) != "," && codigo.charAt(i) != ";") {
+						if (codigo.charAt(i) != '"')
+							valor = valor + codigo.charAt(i);
+						i++;
+					}
+				}
+
+				if (codigo.charAt(i) == "," || codigo.charAt(i) == ";") {
+					nome = nome.trim();
+					valor = valor != "" ? valor.trim() : valor;
+					debugger;
+					arvoreSimbolo[contexto].push([nome, tipo, valor]);
+					nome = "";
+					valor = "";
+				}
+
+				if (codigo.charAt(i) == ";")
+					i--;
+				i++;
+			}
+		}
+
+		function montaArvoreSimbolos() {
+
+
+			var arvoreSimboloTemp = [];
+			var arvoreAtribuicao = [];
+			var contexto = -1;
+			var codigo = $('#codigo').val();
+
+			while (i < codigo.length) {
+
+				var tipo = (codigo.charAt(i) + codigo.charAt(i + 1) + codigo.charAt(i + 2) + codigo.charAt(i + 3) + codigo.charAt(i + 4)).trim();
+				var teste = codigo.charAt(i);
+			
+				if (tipo == "int") {
+					debugger;
+					montarArvoreSimboloTemp(codigo, tipo, contexto);
+				}
+
+				if (tipo == "char") {
+					montarArvoreSimboloTemp(codigo, tipo, contexto);
+				}
+
+				if (tipo == "float") {
+					montarArvoreSimboloTemp(codigo, tipo, contexto);
+				}
+
+				tipo = "";
+
+				if (codigo.charAt(i) == "{") {
+					if (contexto == -1) {
+						contexto++;
+						arvoreSimbolo.push([]);
+					}
+					else {
+						arvoreSimbolo.push([]);
+						contexto += 1;
+					}
+				}
+
+				if (codigo.charAt(i) == "}" && arvoreSimboloTemp.length != 0) {
+					contexto -= 1;
+				}
+
+				
+				i++;
+
+
+			}
+
+			console.log(arvoreSimbolo);
+			return arvoreSimbolo;
+
+		}
+
+
+
+	</script>
+
+</body>
+
+</html>
