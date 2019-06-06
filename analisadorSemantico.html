@@ -18,7 +18,8 @@ main()
     {
         char t, y = 't';
         int a1 = 5, b, c3 = 7;
-        a=b*c;
+        t=t+y;
+        a=b*t;
     }
     int d;    
 }  
@@ -31,6 +32,8 @@ main()
 
 		var i = 0;
 		var arvoreSimbolo = [];
+		var arvoreAtribuicao = [];
+
 		Analisador();
 
 		function Analisador() {
@@ -74,18 +77,14 @@ main()
 		}
 
 		function montaArvoreSimbolos() {
-
-
-			var arvoreSimboloTemp = [];
-			var arvoreAtribuicao = [];
 			var contexto = -1;
-			var codigo = $('#codigo').val();
+			var codigo = $('#codigo').val().replace(/(\r\n|\n|\r)/gm, "");
 
 			while (i < codigo.length) {
 
 				var tipo = (codigo.charAt(i) + codigo.charAt(i + 1) + codigo.charAt(i + 2) + codigo.charAt(i + 3) + codigo.charAt(i + 4) + codigo.charAt(i + 5)).trim();
 				var teste = codigo.charAt(i);
-			
+
 				if (tipo == "int") {
 					montarArvoreSimboloTemp(codigo, tipo, contexto);
 				}
@@ -97,13 +96,12 @@ main()
 				if (tipo == "float") {
 					montarArvoreSimboloTemp(codigo, tipo, contexto);
 				}
-				
+
 				if (tipo == "double") {
 					montarArvoreSimboloTemp(codigo, tipo, contexto);
 				}
-				
+
 				tipo = "";
-				;
 				if (codigo.charAt(i) == "{") {
 					if (contexto == -1) {
 						contexto++;
@@ -119,14 +117,88 @@ main()
 					contexto -= 1;
 				}
 
-				
+
 				i++;
-
-
 			}
 
 			console.log(arvoreSimbolo);
+			arvoreSemantica();
 			return arvoreSimbolo;
+		}
+
+		function arvoreSemantica() {
+			var codigoParticinado = "";
+
+			codigoParticinado = codigo.textContent.replace(/(\r\n|\n|\r)/gm, "");
+
+			codigoParticinado = codigoParticinado.replace(/=/g, " EQUAL ");
+
+			codigoParticinado = codigoParticinado.replace(/\+/g, " ADD ");
+
+			codigoParticinado = codigoParticinado.replace(/\-/g, " SUB ");
+
+			codigoParticinado = codigoParticinado.replace(/\*/g, " MULT ");
+
+			codigoParticinado = codigoParticinado.replace(/\//g, " DIV ");
+
+			codigoParticinado = codigoParticinado.replace(/;/g, " ; ");
+
+			codigoParticinado = codigoParticinado.replace(/,/g, " , ");
+
+			arvoreAtribuicao = codigoParticinado.split(" ");
+
+			arvoreAtribuicao = arvoreAtribuicao.filter(item => item !== "")
+
+			var contexto = 0;
+
+			var numeros = ["int", "float", "double"];
+
+			arvoreAtribuicao.forEach(function (item, index) {
+				if (item == "{")
+					contexto++;
+				if (item == "}")
+					contexto--;
+
+				var recebedorTipo = "";
+				var operacoesTipo = "";
+
+				if (item == "EQUAL" && arvoreAtribuicao[index + 2] != "," && arvoreAtribuicao[index + 2] != ";") {
+					debugger;
+					recebedorTipo = arvoreSimbolo[contexto].filter(itemBusca => itemBusca[0] == arvoreAtribuicao[index - 1]);
+					recebedorTipo.length != 0 ? recebedorTipo = recebedorTipo[0][1] : recebedorTipo = "erro";
+
+					operacoesTipo = arvoreSimbolo[contexto].filter(itemBusca => itemBusca[0] == arvoreAtribuicao[index + 1]);
+					recebedorTipo.length != 0 ? operacoesTipo = operacoesTipo[0][1] : operacoesTipo = "erro";
+
+					if ((numeros.indexOf(recebedorTipo) != -1 && operacoesTipo == "char") || (recebedorTipo == "char" && numeros.indexOf(operacoesTipo) != -1) || operacoesTipo == "erro" || recebedorTipo == "erro")
+						return false;
+					console.log(item);
+				}
+
+				if (recebedorTipo != "") {
+					i = 0;
+					while (arvoreAtribuicao[index + 1] != ";") {
+						debugger;
+						var rt = arvoreAtribuicao[index + 1];
+
+						arvoreSimbolo[contexto].forEach(function (it) {
+							if (it[0] == arvoreAtribuicao[index + 1] && operacoesTipo == it[1])
+								operacoesTipo = it[1];
+
+							else if(it[0] == arvoreAtribuicao[index + 1] && operacoesTipo != it[1]) {
+								operacoesTipo = "fim"
+								return false;
+							}
+						});
+						index++;
+					}
+					recebedorTipo = "";
+					operacoesTipo = "";
+
+				}
+
+			});
+
 
 		}
 
