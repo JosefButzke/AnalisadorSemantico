@@ -9,17 +9,18 @@
 	<textarea id="codigo" name="codigo" rows="20" cols="60">
 main()
 {
-	int a = 1, b=2, c;
-	char t, y = "s";
-	float r = 1.2, y;
+    int a = 1, b=2, c;
+    char t, y = 's';
+    float r = 1.2, y;
+    double ty = 4.321412;
     a=b+c;
     if(a>b)
     {
-        char t, y = "t";
+        char t, y = 't';
         int a1 = 5, b, c3 = 7;
         a=b*c;
-	}   
-	int d;    
+    }
+    int d;    
 }  
 </textarea>
 	</br>
@@ -37,7 +38,7 @@ main()
 		}
 
 		function montarArvoreSimboloTemp(codigo, tipo, contexto) {
-			i = i + 5;
+			i = i + 6;
 			var nome = "";
 			var valor = "";
 			while (codigo.charAt(i) != ";") {
@@ -49,16 +50,15 @@ main()
 					i++;
 					valor = "";
 					while (codigo.charAt(i) != "," && codigo.charAt(i) != ";") {
-						if (codigo.charAt(i) != '"')
+						if (codigo.charAt(i) != "'")
 							valor = valor + codigo.charAt(i);
 						i++;
 					}
 				}
 
-				if (codigo.charAt(i) == "," || codigo.charAt(i) == ";") {
+				if (codigo.charAt(i) == ",") {
 					nome = nome.trim();
 					valor = valor != "" ? valor.trim() : valor;
-					debugger;
 					arvoreSimbolo[contexto].push([nome, tipo, valor]);
 					nome = "";
 					valor = "";
@@ -68,6 +68,9 @@ main()
 					i--;
 				i++;
 			}
+			nome = nome.trim();
+			valor = valor != "" ? valor.trim() : valor;
+			arvoreSimbolo[contexto].push([nome, tipo, valor]);
 		}
 
 		function montaArvoreSimbolos() {
@@ -80,11 +83,10 @@ main()
 
 			while (i < codigo.length) {
 
-				var tipo = (codigo.charAt(i) + codigo.charAt(i + 1) + codigo.charAt(i + 2) + codigo.charAt(i + 3) + codigo.charAt(i + 4)).trim();
+				var tipo = (codigo.charAt(i) + codigo.charAt(i + 1) + codigo.charAt(i + 2) + codigo.charAt(i + 3) + codigo.charAt(i + 4) + codigo.charAt(i + 5)).trim();
 				var teste = codigo.charAt(i);
 			
 				if (tipo == "int") {
-					debugger;
 					montarArvoreSimboloTemp(codigo, tipo, contexto);
 				}
 
@@ -95,9 +97,13 @@ main()
 				if (tipo == "float") {
 					montarArvoreSimboloTemp(codigo, tipo, contexto);
 				}
-
+				
+				if (tipo == "double") {
+					montarArvoreSimboloTemp(codigo, tipo, contexto);
+				}
+				
 				tipo = "";
-
+				;
 				if (codigo.charAt(i) == "{") {
 					if (contexto == -1) {
 						contexto++;
@@ -109,7 +115,7 @@ main()
 					}
 				}
 
-				if (codigo.charAt(i) == "}" && arvoreSimboloTemp.length != 0) {
+				if (codigo.charAt(i) == "}") {
 					contexto -= 1;
 				}
 
