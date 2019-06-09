@@ -13,120 +13,41 @@ main()
     char t, y = 's';
     float r = 1.2, y;
     double ty = 4.321412;
-    a=b+c;
+    a=b+c*(c+a);
     if(a>b)
     {
         char t, y = 't';
         int a1 = 5, b, c3 = 7;
         t=t+y;
-        a=b*t;
+        a=b*a1;
     }
-    int d;    
+    a = a + b;
+    int d;
+    a = d + c;
+    a = a + a;
+    a = d + c3; 
 }  
 </textarea>
 	</br>
 
+	<div id="saida"></div>
+
 	<script src="jquery-3.3.1.min.js"></script>
 
 	<script>
-
-		var i = 0;
-		var arvoreSimbolo = [];
-		var arvoreAtribuicao = [];
+		var tabelaSimbolos = []
 
 		Analisador();
 
 		function Analisador() {
-			return montaArvoreSimbolos();
+			var codigo = desmembraCodigo();
+
+			montarCodigoIntermediario();
+
 		}
 
-		function montarArvoreSimboloTemp(codigo, tipo, contexto) {
-			i = i + 6;
-			var nome = "";
-			var valor = "";
-			while (codigo.charAt(i) != ";") {
-				var x = codigo.charAt(i);
-				if (codigo.charAt(i) != "=" && codigo.charAt(i) != ",")
-					nome = nome + codigo.charAt(i);
+		function desmembraCodigo() {
 
-				if (codigo.charAt(i) == "=") {
-					i++;
-					valor = "";
-					while (codigo.charAt(i) != "," && codigo.charAt(i) != ";") {
-						if (codigo.charAt(i) != "'")
-							valor = valor + codigo.charAt(i);
-						i++;
-					}
-				}
-
-				if (codigo.charAt(i) == ",") {
-					nome = nome.trim();
-					valor = valor != "" ? valor.trim() : valor;
-					arvoreSimbolo[contexto].push([nome, tipo, valor]);
-					nome = "";
-					valor = "";
-				}
-
-				if (codigo.charAt(i) == ";")
-					i--;
-				i++;
-			}
-			nome = nome.trim();
-			valor = valor != "" ? valor.trim() : valor;
-			arvoreSimbolo[contexto].push([nome, tipo, valor]);
-		}
-
-		function montaArvoreSimbolos() {
-			var contexto = -1;
-			var codigo = $('#codigo').val().replace(/(\r\n|\n|\r)/gm, "");
-
-			while (i < codigo.length) {
-
-				var tipo = (codigo.charAt(i) + codigo.charAt(i + 1) + codigo.charAt(i + 2) + codigo.charAt(i + 3) + codigo.charAt(i + 4) + codigo.charAt(i + 5)).trim();
-				var teste = codigo.charAt(i);
-
-				if (tipo == "int") {
-					montarArvoreSimboloTemp(codigo, tipo, contexto);
-				}
-
-				if (tipo == "char") {
-					montarArvoreSimboloTemp(codigo, tipo, contexto);
-				}
-
-				if (tipo == "float") {
-					montarArvoreSimboloTemp(codigo, tipo, contexto);
-				}
-
-				if (tipo == "double") {
-					montarArvoreSimboloTemp(codigo, tipo, contexto);
-				}
-
-				tipo = "";
-				if (codigo.charAt(i) == "{") {
-					if (contexto == -1) {
-						contexto++;
-						arvoreSimbolo.push([]);
-					}
-					else {
-						arvoreSimbolo.push([]);
-						contexto += 1;
-					}
-				}
-
-				if (codigo.charAt(i) == "}") {
-					contexto -= 1;
-				}
-
-
-				i++;
-			}
-
-			console.log(arvoreSimbolo);
-			arvoreSemantica();
-			return arvoreSimbolo;
-		}
-
-		function arvoreSemantica() {
 			var codigoParticinado = "";
 
 			codigoParticinado = codigo.textContent.replace(/(\r\n|\n|\r)/gm, "");
@@ -141,64 +62,172 @@ main()
 
 			codigoParticinado = codigoParticinado.replace(/\//g, " DIV ");
 
+			codigoParticinado = codigoParticinado.replace(/{/g, " { ");
+
+			codigoParticinado = codigoParticinado.replace(/}/g, " } ");
+
+			codigoParticinado = codigoParticinado.replace(/\(/g, " ( ");
+
+			codigoParticinado = codigoParticinado.replace(/\)/g, " ) ");
+
 			codigoParticinado = codigoParticinado.replace(/;/g, " ; ");
 
 			codigoParticinado = codigoParticinado.replace(/,/g, " , ");
 
 			arvoreAtribuicao = codigoParticinado.split(" ");
 
-			arvoreAtribuicao = arvoreAtribuicao.filter(item => item !== "")
+			arvoreAtribuicao = arvoreAtribuicao.filter(item => item !== "");
 
-			var contexto = 0;
+			arvoreAtribuicao.forEach(function(item, index){
+				arvoreAtribuicao[index] = item.trim();
+			});
 
+			return arvoreAtribuicao;
+		}
+
+		function montarCodigoIntermediario() {
+
+			var contexto = -1;
 			var numeros = ["int", "float", "double"];
+			var index = 0;
 
-			arvoreAtribuicao.forEach(function (item, index) {
-				if (item == "{")
+			var atribuicao = "";
+
+			var erro = 0;
+
+			for (index = 0; index < arvoreAtribuicao.length; index++) {
+				if (erro == 1)
+					break;
+
+				if (arvoreAtribuicao[index] == "{") {
+					tabelaSimbolos.push([]);
 					contexto++;
-				if (item == "}")
+				}
+				if (arvoreAtribuicao[index] == "}")
 					contexto--;
 
 				var recebedorTipo = "";
 				var operacoesTipo = "";
 
-				if (item == "EQUAL" && arvoreAtribuicao[index + 2] != "," && arvoreAtribuicao[index + 2] != ";") {
-					debugger;
-					recebedorTipo = arvoreSimbolo[contexto].filter(itemBusca => itemBusca[0] == arvoreAtribuicao[index - 1]);
-					recebedorTipo.length != 0 ? recebedorTipo = recebedorTipo[0][1] : recebedorTipo = "erro";
+				if (arvoreAtribuicao[index] == "int" || arvoreAtribuicao[index] == "char" || arvoreAtribuicao[index] == "float" || arvoreAtribuicao[index] == "double") {
+					var tipo = arvoreAtribuicao[index];
+					while (arvoreAtribuicao[index] != ";") {
+						var variavel = ["", "", ""];
 
-					operacoesTipo = arvoreSimbolo[contexto].filter(itemBusca => itemBusca[0] == arvoreAtribuicao[index + 1]);
-					recebedorTipo.length != 0 ? operacoesTipo = operacoesTipo[0][1] : operacoesTipo = "erro";
+						if (arvoreAtribuicao[index + 2] == "EQUAL") {
+							variavel[0] = arvoreAtribuicao[index + 1];
+							variavel[1] = tipo;
+							if (tipo == "char")
+								variavel[2] = arvoreAtribuicao[index + 3].replace(/'/g, "");
+							else
+								variavel[2] = arvoreAtribuicao[index + 3];
+							tabelaSimbolos[contexto].push(variavel);
+							variavel = ["", "", ""];
+							index = index + 4;
+						}
 
-					if ((numeros.indexOf(recebedorTipo) != -1 && operacoesTipo == "char") || (recebedorTipo == "char" && numeros.indexOf(operacoesTipo) != -1) || operacoesTipo == "erro" || recebedorTipo == "erro")
-						return false;
-					console.log(item);
+						if (arvoreAtribuicao[index + 2] == "," || arvoreAtribuicao[index + 2] == ";") {
+							variavel[0] = arvoreAtribuicao[index + 1];
+							if(variavel[0] == "d")
+							variavel[1] = tipo;
+							variavel[2] = null;
+							tabelaSimbolos[contexto].push(variavel);
+							variavel = ["", "", ""];
+							index = index + 2;
+						}
+
+					}
+
+				}
+
+				if (arvoreAtribuicao[index] == "EQUAL" && arvoreAtribuicao[index + 2] != "," && arvoreAtribuicao[index + 2] != ";") {
+
+					var cont = index;
+					atribuicao = arvoreAtribuicao[cont - 1];
+
+					while (arvoreAtribuicao[cont - 1] != ";") {
+						atribuicao = atribuicao + arvoreAtribuicao[cont];
+						cont++;
+					}
+
+					var contextoTemp = contexto;
+					while (recebedorTipo.length == 0 && contextoTemp != -1) {
+						recebedorTipo = tabelaSimbolos[contextoTemp].filter(itemBusca => itemBusca[0] == arvoreAtribuicao[index - 1]);
+						if (recebedorTipo.length != 0) {
+							recebedorTipo = recebedorTipo[0][1];
+							erro = 0;
+						}
+						else
+							erro = 1;
+						contextoTemp--;
+					}
+
+					// if ((numeros.indexOf(recebedorTipo) != -1 && operacoesTipo == "char") || (recebedorTipo == "char" && numeros.indexOf(operacoesTipo) != -1) || operacoesTipo == "erro" || recebedorTipo == "erro")
+					// 	return false;
+					console.log(arvoreAtribuicao[index]);
 				}
 
 				if (recebedorTipo != "") {
-					i = 0;
-					while (arvoreAtribuicao[index + 1] != ";") {
-						debugger;
-						var rt = arvoreAtribuicao[index + 1];
+					index++;
+					var tiposOperacoes = [];
+					var exclui = ["ADD", "SUB", "MULT", "DIV", "(", ")"]
 
-						arvoreSimbolo[contexto].forEach(function (it) {
-							if (it[0] == arvoreAtribuicao[index + 1] && operacoesTipo == it[1])
-								operacoesTipo = it[1];
-
-							else if(it[0] == arvoreAtribuicao[index + 1] && operacoesTipo != it[1]) {
-								operacoesTipo = "fim"
-								return false;
-							}
-						});
+					while (arvoreAtribuicao[index] != ";") {
+						var rt = arvoreAtribuicao[index];
+						if (exclui.indexOf(arvoreAtribuicao[index]) == -1) {
+							tiposOperacoes.push(arvoreAtribuicao[index]);
+						}
 						index++;
 					}
+
+					var contador = 0;
+					while (contador < tiposOperacoes.length) {
+
+						var contextoTemp = contexto;
+						var fim = 0;
+						while (contextoTemp != -1 || fim != 2 && erro != 1) {
+							tabelaSimbolos[contextoTemp].forEach(function (element) {
+								if (element[0] == tiposOperacoes[contador] && ((numeros.indexOf(recebedorTipo) != -1 && element[1] != "char") || (numeros.indexOf(recebedorTipo) == -1 && element[1] == "char"))) {
+									fim = 2;
+								}
+							});
+							contextoTemp--;
+							if (contextoTemp == -1 && fim != 2) {
+								erro = 1;
+							}
+						}
+
+						if (fim != 2)
+							erro = 1;
+
+						contador++;
+					}
+						atribuicao = atribuicao.replace(/EQUAL/g, " = ");
+
+						atribuicao = atribuicao.replace(/ADD/g, " + ");
+
+						atribuicao = atribuicao.replace(/SUB/g, " - ");
+
+						atribuicao = atribuicao.replace(/MULT/g, " * ");
+
+						atribuicao = atribuicao.replace(/DIV/g, " / ");
+
+						atribuicao = atribuicao.replace(/\(/g, " ( ");
+
+						atribuicao = atribuicao.replace(/\)/g, " ) ");
+
+						erro == 0 ? atribuicao : atribuicao = "erro";
+
+						$('#saida').append('<div>' + atribuicao + '</div>');
+
 					recebedorTipo = "";
 					operacoesTipo = "";
 
 				}
 
-			});
+			}
 
+			// if(erro)
 
 		}
 
