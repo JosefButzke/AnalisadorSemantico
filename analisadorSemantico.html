@@ -202,15 +202,15 @@ main()
 
 						contador++;
 					}
-						atribuicao = atribuicao.replace(/EQUAL/g, " = ");
+						atribuicao = atribuicao.replace(/EQUAL/g, " EQUAL ");
 
-						atribuicao = atribuicao.replace(/ADD/g, " + ");
+						atribuicao = atribuicao.replace(/ADD/g, " ADD ");
 
-						atribuicao = atribuicao.replace(/SUB/g, " - ");
+						atribuicao = atribuicao.replace(/SUB/g, " SUB ");
 
-						atribuicao = atribuicao.replace(/MULT/g, " * ");
+						atribuicao = atribuicao.replace(/MULT/g, " MULT ");
 
-						atribuicao = atribuicao.replace(/DIV/g, " / ");
+						atribuicao = atribuicao.replace(/DIV/g, " DIV ");
 
 						atribuicao = atribuicao.replace(/\(/g, " ( ");
 
@@ -226,8 +226,6 @@ main()
 				}
 
 			}
-
-			// if(erro)
 
 		}
 
